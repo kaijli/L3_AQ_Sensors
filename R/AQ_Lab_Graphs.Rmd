@@ -1,0 +1,113 @@
+---
+title: "graphs"
+author: "Kaitlyn Li"
+date: "10/27/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(latex2exp)
+```
+
+
+```{r}
+aq_data <- read_csv("On_Campus_AQ_Data.csv") %>%
+  select(-X1) %>%
+  arrange(sensor)
+
+tt_data <- read_csv("Tues_Thur_Data.csv")
+```
+
+```{r}
+aq_in <- tt_data %>%
+  filter(location == "in") %>%
+  group_by(sensor, day) %>%
+  summarize(pm1_avg = mean(pm_1),
+            pm1_sd = sd(pm_1),
+            pm2.5_avg = mean(pm_25),
+            pm2.5_sd = sd(pm_25),
+            pm10_avg = mean(pm_10),
+            pm10_sd = sd(pm_10))
+
+aq_out <- tt_data %>%
+  filter(location == "out") %>%
+  group_by(sensor, day) %>%
+  summarize(pm1_avg = mean(pm_1),
+            pm1_sd = sd(pm_1),
+            pm2.5_avg = mean(pm_25),
+            pm2.5_sd = sd(pm_25),
+            pm10_avg = mean(pm_10),
+            pm10_sd = sd(pm_10))
+```
+
+
+```{r}
+aq_stats <- aq_data %>%
+  group_by(sensor, location, day, pm, build_age, direction) %>%
+  summarize(mean = mean(reading), 
+            sd = sd(reading))%>% 
+  mutate(age_location = factor(paste(build_age, location, sep = "~"))) %>%
+  mutate(dir_location = factor(paste(direction, location, sep = "~"))) %>%
+  mutate(age_dir_loc = factor(paste(build_age, direction, location, sep = "~")))
+```
+
+```{r}
+aq_stats %>% 
+  ggplot(aes(x = sensor, y = mean, ymin = mean - sd, ymax = mean + sd, fatten = .45, color = fct_relevel(day, "Tuesday", after = 0))) + 
+  geom_pointrange() +
+  facet_wrap(vars(location, fct_relevel(pm, "pm_2.5", after = 1)), nrow = 2) +
+  labs(x = "Sensor Number",y = TeX("Mean Reading $\\mu$g m$^{-3}$"), title = "On Campus AQ Sensor Readings", color = "Day")
+
+```
+
+
+```{r}
+ggplot(aq_data, aes(x = sensor, y = reading, fill = day)) +
+  geom_boxplot() +
+  facet_wrap(vars(location, pm), nrow = 2)
+```
+
+```{r}
+aq_stats %>% 
+  filter(location == "in") %>%
+  ggplot(aes(x = sensor, y = mean, ymin = mean - sd, ymax = mean + sd, fatten = .45, color = build_age)) + 
+  geom_pointrange() +
+  facet_wrap(vars(fct_relevel(day, "Tuesday", after = 0),  fct_relevel(pm, "pm_2.5", after = 1)), nrow = 2) +
+  labs(x = "Sensor Number",y = TeX("Mean Reading $\\mu$g m$^{-3}$"), title = "On Campus AQ Sensor Readings", color = "Building Age")
+```
+
+```{r}
+aq_data %>%
+  filter(location == "in") %>%
+  ggplot(aes(x = sensor, y = reading, fill = build_age)) +
+    geom_col() +
+    facet_wrap(vars(day, pm), nrow = 2)
+```
+```{r}
+aq_stats %>% 
+  filter(location == "out") %>%
+  ggplot(aes(x = sensor, y = mean, ymin = mean - sd, ymax = mean + sd, fatten = .45, color = direction
+             )) + 
+  geom_pointrange() +
+  facet_wrap(vars(fct_relevel(day, "Tuesday", after = 0), fct_relevel(pm, "pm_2.5", after = 1)), nrow = 2) +
+  labs(x = "Sensor Number", y = TeX("Mean Reading $\\mu$g m$^{-3}$"), title = "On Campus AQ Sensor Readings", color = "Location")
+```
+
+```{r}
+aq_data %>%
+  filter(location == "out") %>%
+  ggplot(aes(x = sensor, y = reading, fill = direction)) +
+    geom_col() +
+    facet_wrap(vars(day, pm), nrow = 2)
+```
+
+```{r, fig.width=7in}
+aq_stats %>% 
+  ggplot(aes(x = sensor, y = mean, ymin = mean - sd, ymax = mean + sd, fatten = .45, color = age_dir_loc)) + 
+  geom_pointrange() +
+  facet_wrap(vars(fct_relevel(day, "Tuesday", after = 0), fct_relevel(pm, "pm_2.5", after = 1)), nrow = 2) +
+  scale_color_brewer(name = "Age~Direction~Location", palette = "Paired") +
+  labs(x = "Sensor Number", y = TeX("Mean Reading $\\mu$g m$^{-3}$"), title = "On Campus AQ Sensor Readings")
+```

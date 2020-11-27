@@ -1,0 +1,173 @@
+---
+title: "on campus AQ data"
+output: html_document
+---
+
+```{r}
+library(lattice)
+library(SDMTools)
+library(outliers)
+library(gplots)
+library(stats)
+###import data from files before running.
+thursday<-read_csv("~/Chem 313 lab/Chem313-lab3-AQ-sensors/thursday_data.csv")
+tuesday<-read_csv("~/Chem 313 lab/Chem313-lab3-AQ-sensors/tuesday_data.csv")
+
+```
+
+what we are looking at
+```{r}
+tuesday_in<- mutate(tuesday)%>%
+  filter(location  =="in")
+tuesday_out<-mutate(tuesday)%>%
+  filter(location=="out")
+```
+
+Tuesady's data
+```{r}
+
+## remodled/built after 2000 = newer
+tue_in_old<- mutate(tuesday)%>%
+  group_by(location)%>%
+  filter(location=="in",
+         sensor=="18"| sensor== "21"| sensor =="9" |sensor =="19" |sensor =="11")
+
+  tue_in_new<- mutate(tuesday)%>%
+  group_by(location)%>%
+  filter(location=="in",
+         sensor=="5"| sensor== "10"| sensor=="3"  | sensor =="14")
+
+  #creating a north south line passing through the rugby field andpassing through the PAB entrance. 19, 11, 5, 10 are west. 3, 18, 21, 9, 14 are east.
+tue_out_west<- mutate(tuesday)%>%
+  group_by(location)%>%
+  filter(location=="out",
+        sensor=="5"| sensor== "10"| sensor=="19"  | sensor =="11")
+
+tue_out_east<- mutate(tuesday)%>%
+  group_by(location)%>%
+  filter(location=="out",
+        sensor=="18"| sensor== "14"| sensor=="9"  | sensor =="3" | sensor=="21")
+```
+
+Thursday's data
+```{r}
+
+## remodled/built after 2000 = newer
+thur_in_old<- mutate(thursday)%>%
+  group_by(location)%>%
+  filter(location=="in",
+         sensor=="18"| sensor== "21"| sensor =="9" |sensor =="19" |sensor =="11")
+
+  thur_in_new<- mutate(tuesday)%>%
+  group_by(location)%>%
+  filter(location=="in",
+         sensor=="5"| sensor== "10"| sensor=="3"  | sensor =="14")
+
+  #creating a north south line passing through the rugby field andpassing through the PAB entrance. 19, 11, 5, 10 are west. 3, 18, 21, 9, 14 are east.
+thur_out_west<- mutate(thursday)%>%
+  group_by(location)%>%
+  filter(location=="out",
+        sensor=="5"| sensor== "10"| sensor=="19"  | sensor =="11")
+
+thur_out_east<- mutate(thursday)%>%
+  group_by(location)%>%
+  filter(location=="out",
+        sensor=="18"| sensor== "14"| sensor=="9"  | sensor =="3" | sensor=="21")
+```
+
+tuesday inside f tests new vs. old
+```{r}
+#PM1 
+var.test(tue_in_new$pm_1,tue_in_old$pm_1)
+
+#new vs old PM2.5 
+
+var.test(tue_in_new$pm_25,tue_in_old$pm_25)
+#new vs old PM10 
+var.test(tue_in_new$pm_10,tue_in_old$pm_10)
+```
+
+tuesday outside f tests east vs. west
+```{r}
+#PM1 
+var.test(tue_out_west$pm_1,tue_out_east$pm_1)
+
+#new vs old PM2.5 
+
+var.test(tue_out_west$pm_25,tue_out_east$pm_25)
+#new vs old PM10 
+var.test(tue_out_west$pm_10,tue_out_east$pm_10)
+```
+
+thursday inside f tests new vs. old
+```{r}
+#PM1 
+var.test(thur_in_new$pm_1,thur_in_old$pm_1)
+
+#new vs old PM2.5 
+
+var.test(thur_in_new$pm_25,thur_in_old$pm_25)
+#new vs old PM10 
+var.test(thur_in_new$pm_10,thur_in_old$pm_10)
+```
+
+thursday outside f tests east vs. west
+```{r}
+#PM1 
+var.test(thur_out_west$pm_1,thur_out_east$pm_1)
+
+#new vs old PM2.5 
+
+var.test(thur_out_west$pm_25,thur_out_east$pm_25)
+#new vs old PM10 
+var.test(thur_out_west$pm_10,thur_out_east$pm_10)
+```
+
+tuesday inside t tests new vs. old
+```{r}
+#PM1 
+t.test(tue_in_new$pm_1,tue_in_old$pm_1, mu=0,paired=FALSE, var.equal = TRUE)
+
+#new vs old PM2.5 
+t.test(tue_in_new$pm_25,tue_in_old$pm_25, mu=0,paired=FALSE, var.equal = TRUE)
+
+#new vs old PM10 
+t.test(tue_in_new$pm_10,tue_in_old$pm_10, mu=0,paired=FALSE, var.equal = TRUE)
+```
+
+tuesday outside t tests east vs. west
+```{r}
+#PM1 
+t.test(tue_out_west$pm_1,tue_out_east$pm_1, mu=0,paired=FALSE, var.equal = TRUE)
+
+#PM2.5 
+t.test(tue_out_west$pm_25,tue_out_east$pm_25, mu=0,paired=FALSE, var.equal = TRUE)
+
+#PM10 
+t.test(tue_out_west$pm_10,tue_out_east$pm_10, mu=0,paired=FALSE, var.equal = TRUE)
+```
+
+thursday inside t tests new vs. old
+```{r}
+#PM1 
+t.test(thur_in_new$pm_1,thur_in_old$pm_1, mu=0,paired=FALSE, var.equal = TRUE)
+
+#new vs old PM2.5 
+t.test(thur_in_new$pm_25,thur_in_old$pm_25, mu=0,paired=FALSE, var.equal = TRUE)
+
+#new vs old PM10 
+t.test(thur_in_new$pm_10,thur_in_old$pm_10, mu=0,paired=FALSE, var.equal = TRUE)
+```
+
+thursday outside t tests east vs. west
+```{r}
+#PM1 
+t.test(thur_out_west$pm_1,thur_out_east$pm_1, mu=0,paired=FALSE, var.equal = TRUE)
+
+#PM2.5 
+t.test(thur_out_west$pm_25,thur_out_east$pm_25, mu=0,paired=FALSE, var.equal = TRUE)
+
+#PM10 
+t.test(thur_out_west$pm_10,thur_out_east$pm_10, mu=0,paired=FALSE, var.equal = TRUE)
+```
+

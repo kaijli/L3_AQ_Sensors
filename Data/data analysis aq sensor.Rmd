@@ -1,0 +1,12 @@
+---
+title: "Data analysis AQ sensor"
+output: html_notebook
+---
+
+input data 
+```{r}
+library(chemistr)
+library(tidyr)
+
+
+```
